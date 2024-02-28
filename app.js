@@ -4,7 +4,7 @@ const loadData = async (isShowAll) => {
   const res = await fetch(url);
   const data = await res.json();
 
-  // Skip cards with id equal to 6 and 11 beacuse they don't have image
+  // Skip tools with id equal to 6 and 11 beacuse they don't have image
   const tools = data.data.tools.filter(
     (tool) => tool.id !== "06" && tool.id !== "11"
   );
@@ -52,7 +52,7 @@ const displayData = (tools, isShowAll) => {
                 <img src="./img/Vector.svg" alt="Vector" />
                 <p>${tool.published_in}</p>
             </div>
-            <img src="./img/arrow.png" alt="arrow" />
+            <img src="./img/arrow.png" alt="arrow" class="cursor-pointer" onclick="handleShowDetails('${tool.id}')" />
             </div>
         </div>
         </div>
@@ -67,6 +67,59 @@ const showAllCard = () => {
 
   const showAllCardContainer = document.getElementById("show-all-card");
   showAllCardContainer.classList.add("hidden");
+};
+
+const handleShowDetails = async (id) => {
+  const res = await fetch(
+    `https://openapi.programming-hero.com/api/ai/tool/${id}`
+  );
+
+  const data = await res.json();
+
+  showToolDetails(data.data);
+};
+
+const showToolDetails = (tool) => {
+  const showDetailsContainer = document.getElementById(
+    "show-details-container"
+  );
+
+  const div = document.createElement("div");
+  showDetailsContainer.textContent = "";
+
+  div.innerHTML = `
+        <div class="max-w-md mx-auto bg-white rounded-xl overflow-hidden shadow-md">
+        <div class="flex justify-center mt-4">
+            <img
+            src="${tool.image_link[0]}"
+            alt="ChatGPT Logo"
+            class="rounded-xl"
+            />
+        </div>
+        <div class="px-6 py-4">
+            <h3 class="font-bold text-xl mb-2">${tool.tool_name}</h3>
+            <p class="text-gray-700 text-base">${tool.description}</p>
+        </div>
+        <div class="px-6 py-4">
+            <h3 class="font-bold text-xl mb-2">Features</h3>
+            <ul class="list-disc list-inside text-gray-700">
+            ${Object.values(tool.features)
+              .map(
+                (feature) => `
+            <li>
+                <strong>${feature.feature_name}:</strong> ${feature.description}
+            </li>
+            `
+              )
+              .join("")}
+            </ul>
+        </div>
+        </div>
+`;
+
+  showDetailsContainer.appendChild(div);
+
+  show_modal.showModal();
 };
 
 loadData();
